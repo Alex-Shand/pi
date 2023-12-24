@@ -107,7 +107,7 @@ fn load_db() -> Result<HashMap<String, String>> {
 fn save_db(db: &HashMap<String, String>) -> Result<()> {
     let mut file = File::create(utils::app_config()?.join(SSH_DB))?;
     for (name, ip) in db {
-        write!(file, "{name} {ip}")?;
+        writeln!(file, "{name} {ip}")?;
     }
     Ok(())
 }

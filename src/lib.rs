@@ -31,6 +31,7 @@ mod mount;
 mod push;
 mod secure;
 mod setup;
+mod pull;
 
 use std::process::ExitCode;
 
@@ -39,6 +40,7 @@ use anyhow::Result;
 
 pub use ssh::ssh;
 pub use resolve::resolve;
+pub use pull::pull;
 
 /// Manager for services running on RaspberryPis
 #[derive(Debug, FromArgs)]
@@ -56,6 +58,7 @@ enum Command {
     Register(register::Args),
     Mount(mount::Args),
     Push(push::Args),
+    Pull(pull::Args),
     Secure(secure::Args),
     Setup(setup::Args),
 }
@@ -77,6 +80,7 @@ pub fn main() -> Result<ExitCode> {
         Command::Register(args) => x!(register::main(&args)),
         Command::Mount(args) => x!(mount::main(&args)),
         Command::Push(args) => x!(push::main(&args)),
+        Command::Pull(args) => x!(pull::main(&args)),
         Command::Secure(args) => x!(secure::main(&args)),
         Command::Setup(args) => x!(setup::main(&args)),
         Command::Ssh(args) => Ok(
