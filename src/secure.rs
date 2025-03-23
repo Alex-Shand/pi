@@ -1,20 +1,22 @@
-use crate::{mount, push, utils};
+use std::{
+    fs::{self, File},
+    io::Write as _,
+    path::Path,
+    process::Command,
+};
 
-use std::path::Path;
-use std::process::Command;
-use std::fs::{self, File};
-use std::io::Write as _;
-
+use anyhow::{bail, Result};
 use argh::FromArgs;
-use anyhow::{Result, bail};
+
+use crate::{mount, push, utils};
 
 /// Disable password ssh on the target pi
 #[derive(Debug, FromArgs)]
-#[argh(subcommand, name="secure")]
+#[argh(subcommand, name = "secure")]
 pub(crate) struct Args {
     /// the pi to secure
     #[argh(positional)]
-    name: String
+    name: String,
 }
 
 pub(crate) fn main(args: &Args) -> Result<()> {
@@ -37,7 +39,7 @@ pub(crate) fn main(args: &Args) -> Result<()> {
 
 fn read_sshd(name: &str) -> Result<String> {
     let tempdir = tempfile::tempdir()?;
-    mount::mount(name, "/etc/ssh", tempdir.path())?;
+    mount(name, "/etc/ssh", tempdir.path())?;
     let _unmount = defer::defer(|| unmount(tempdir.path()));
 
     let sshd_config = tempdir.path().join("sshd_config");
@@ -47,8 +49,10 @@ fn read_sshd(name: &str) -> Result<String> {
 fn unmount(path: impl AsRef<Path>) {
     fn aux(path: &Path) -> Result<()> {
         let success = Command::new("fusermount")
-            .arg("-u").arg(path)
-            .status()?.success();
+            .arg("-u")
+            .arg(path)
+            .status()?
+            .success();
         if success {
             Ok(())
         } else {

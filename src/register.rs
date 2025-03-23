@@ -1,20 +1,26 @@
-use crate::{utils::{self, DefaultPrompt}, resolve, identity::Identity};
+use std::{
+    collections::HashMap,
+    fs::{self, File},
+    io::Write as _,
+    process::Command,
+};
 
-use std::collections::HashMap;
-use std::process::Command;
-use std::fs::{self, File};
-use std::io::Write as _;
-
+use anyhow::{anyhow, bail, Result};
 use argh::FromArgs;
-use anyhow::{Result, anyhow, bail};
+
+use crate::{
+    identity::Identity,
+    resolve,
+    utils::{self, DefaultPrompt},
+};
 
 /// Register a newly imaged pi
 #[derive(Debug, FromArgs)]
-#[argh(subcommand, name="register")]
+#[argh(subcommand, name = "register")]
 pub(crate) struct Args {
     /// the pi to register
     #[argh(positional)]
-    name: String
+    name: String,
 }
 
 pub(crate) fn main(args: &Args) -> Result<()> {
@@ -25,7 +31,10 @@ pub(crate) fn main(args: &Args) -> Result<()> {
         generate_id(&args.name, id, false)?
     };
 
-    prompt!("Attempting partial IP resolution for {}. This may take a while...", args.name);
+    prompt!(
+        "Attempting partial IP resolution for {}. This may take a while...",
+        args.name
+    );
     let ip = resolve::probe(&args.name)?;
     println!("Done");
 
@@ -69,8 +78,10 @@ fn generate_id(name: &str, id: Identity, force: bool) -> Result<Identity> {
         .args(["-t", "rsa"]) // Key format
         .args(["-N", ""]) // No password
         .args(["-C", &format!("Auto-generated key for {name}.local")]) // Comment
-        .arg("-f").arg(&id.private) // Key location
-        .status()?.success();
+        .arg("-f")
+        .arg(&id.private) // Key location
+        .status()?
+        .success();
     if !success {
         bail!("ssh-keygen failed")
     }
@@ -78,22 +89,23 @@ fn generate_id(name: &str, id: Identity, force: bool) -> Result<Identity> {
 }
 
 fn read_known_hosts() -> Result<HashMap<String, Vec<String>>> {
-    let text = fs::read_to_string(utils::home()?.join(".ssh").join("known_hosts"))?;
-    Ok(text.lines()
-       .map(|s| s.split_once(char::is_whitespace))
-       .collect::<Option<Vec<_>>>()
-       .ok_or_else(|| anyhow!("Failed to parse known_hosts"))?
-       .iter()
-       .fold(HashMap::new(), |mut map, &(ip, key)| {
-           map.entry(ip.to_string())
-               .or_insert(Vec::new())
-               .push(key.to_string());
-           map
-       }))
+    let text =
+        fs::read_to_string(utils::home()?.join(".ssh").join("known_hosts"))?;
+    Ok(text
+        .lines()
+        .map(|s| s.split_once(char::is_whitespace))
+        .collect::<Option<Vec<_>>>()
+        .ok_or_else(|| anyhow!("Failed to parse known_hosts"))?
+        .iter()
+        .fold(HashMap::new(), |mut map, &(ip, key)| {
+            map.entry(ip.to_string()).or_default().push(key.to_string());
+            map
+        }))
 }
 
 fn write_known_hosts(data: HashMap<String, Vec<String>>) -> Result<()> {
-    let mut known_hosts = File::create(utils::home()?.join(".ssh").join("known_hosts"))?;
+    let mut known_hosts =
+        File::create(utils::home()?.join(".ssh").join("known_hosts"))?;
     for (ip, keys) in data {
         for key in keys {
             writeln!(known_hosts, "{ip} {key}")?;
@@ -104,9 +116,11 @@ fn write_known_hosts(data: HashMap<String, Vec<String>>) -> Result<()> {
 
 fn send_id(id: &Identity, ip: &str) -> Result<()> {
     let success = Command::new("ssh-copy-id")
-        .arg("-i").arg(&id.public)
+        .arg("-i")
+        .arg(&id.public)
         .arg(format!("pi@{ip}"))
-        .status()?.success();
+        .status()?
+        .success();
     if !success {
         bail!("ssh-copy-id failed")
     }

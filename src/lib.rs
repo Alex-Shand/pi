@@ -21,32 +21,38 @@
 #[macro_use]
 mod macros;
 
-mod image;
-mod resolve;
-mod ssh;
-mod register;
-mod utils;
 mod identity;
+mod image;
 mod mount;
+mod pull;
 mod push;
+mod register;
+mod resolve;
 mod secure;
 mod setup;
-mod pull;
+mod ssh;
+mod utils;
 
 use std::process::ExitCode;
 
-use argh::FromArgs;
 use anyhow::Result;
-
-pub use ssh::ssh;
-pub use resolve::resolve;
+use argh::FromArgs;
+pub use mount::mount;
 pub use pull::pull;
+pub use resolve::resolve;
+pub use ssh::ssh;
 
 /// Manager for services running on RaspberryPis
+///
+/// Order for setting up a new PI:
+/// * image
+/// * register
+/// * secure
+/// * setup
 #[derive(Debug, FromArgs)]
 struct Args {
     #[argh(subcommand)]
-    command: Command
+    command: Command,
 }
 
 #[derive(Debug, FromArgs)]
@@ -64,10 +70,10 @@ enum Command {
 }
 
 macro_rules! x {
-    ($e:expr) => { {
+    ($e:expr) => {{
         $e?;
         Ok(ExitCode::SUCCESS)
-    } }
+    }};
 }
 
 #[allow(missing_docs)]
@@ -83,12 +89,10 @@ pub fn main() -> Result<ExitCode> {
         Command::Pull(args) => x!(pull::main(&args)),
         Command::Secure(args) => x!(secure::main(&args)),
         Command::Setup(args) => x!(setup::main(&args)),
-        Command::Ssh(args) => Ok(
-            ssh::main(&args)?.code()
-                .map_or(
-                    ExitCode::FAILURE,
-                    |code| ExitCode::from(utils::truncate(code))
-                )
-        ),
+        Command::Ssh(args) => {
+            Ok(ssh::main(&args)?.code().map_or(ExitCode::FAILURE, |code| {
+                ExitCode::from(utils::truncate(code))
+            }))
+        }
     }
 }

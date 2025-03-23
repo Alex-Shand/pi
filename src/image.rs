@@ -1,21 +1,22 @@
-use crate::utils;
+use std::{
+    fs::{self, File},
+    io::{Read as _, Write as _},
+    path::{Path, PathBuf},
+    process::Command,
+};
 
-use std::io::Read as _;
-use std::io::Write as _;
-use std::fs::{self, File};
-use std::path::{Path, PathBuf};
-use std::process::Command;
-
-use once_cell::sync::Lazy;
+use anyhow::{anyhow, bail, Result};
 use argh::FromArgs;
 use nix::unistd::Uid;
-use anyhow::{Result, anyhow, bail};
+use once_cell::sync::Lazy;
 #[cfg(debug_assertions)]
 use sliding_windows as _;
 
-const SDPATH: &str = "/dev/sdb";
-const BOOT_PARTITION: &str = "/dev/sdb1";
-const ROOT_PARTITION: &str = "/dev/sdb2";
+use crate::utils;
+
+const SDPATH: &str = "/dev/sda";
+const BOOT_PARTITION: &str = "/dev/sda1";
+const ROOT_PARTITION: &str = "/dev/sda2";
 
 const WIFI: &str = "country=GB\n\
                     ctrl_interface=DIR=/var/run/wpa_supplicant GROUP=netdev\n\
@@ -30,20 +31,26 @@ const USERCONF: &str = "pi:$6$0tJ78aVORQEk8spk$LT66yvA.gwx7jGxJFBSoQF7GTeJDzrqJN
 
 #[cfg(debug_assertions)]
 static RASPBIAN: Lazy<Result<Vec<u8>>> = Lazy::new(|| {
-    Ok(File::open(env!("IMAGE"))?.bytes().collect::<Result<Vec<_>, _>>()?)
+    Ok(File::open(env!("IMAGE"))?
+        .bytes()
+        .collect::<Result<Vec<_>, _>>()?)
 });
 
 #[cfg(not(debug_assertions))]
 static RASPBIAN: Lazy<Result<Vec<u8>>> = Lazy::new(|| {
     use std::env;
-    use sliding_windows::{Storage, IterExt as _};
+
+    use sliding_windows::{IterExt as _, Storage};
 
     const MARKER: &[u8] = "PI_END".as_bytes();
 
-    let bytes = File::open(env::current_exe()?)?.bytes().collect::<Result<Vec<_>, _>>()?;
+    let bytes = File::open(env::current_exe()?)?
+        .bytes()
+        .collect::<Result<Vec<_>, _>>()?;
 
     let mut storage: Storage<(usize, u8)> = Storage::new(MARKER.len());
-    let end = bytes.iter()
+    let end = bytes
+        .iter()
         .copied()
         .enumerate()
         .rev()
@@ -52,39 +59,45 @@ static RASPBIAN: Lazy<Result<Vec<u8>>> = Lazy::new(|| {
             let mut window = window.iter().copied().collect::<Vec<_>>();
             window.reverse();
             let start = window[0].0;
-            let bytes = window.into_iter().map(|(_, byte)| byte).collect::<Vec<_>>();
+            let bytes =
+                window.into_iter().map(|(_, byte)| byte).collect::<Vec<_>>();
             (start, bytes)
         })
         .find(|(_, window)| window == MARKER)
-        .ok_or_else(|| anyhow!("Couldn't find the end of the embedded ISO"))?.0;
-    let start = usize::try_from(
-        u64::from_le_bytes(
-            <[u8; 8]>::try_from(
-                bytes.iter()
-                    .copied()
-                    .skip(end + MARKER.len())
-                    .collect::<Vec<_>>()
-            ).map_err(|v| anyhow!("Expected to find 8 bytes after the end marker, got {}", v.len()))?
+        .ok_or_else(|| anyhow!("Couldn't find the end of the embedded ISO"))?
+        .0;
+    let start = usize::try_from(u64::from_le_bytes(
+        <[u8; 8]>::try_from(
+            bytes
+                .iter()
+                .copied()
+                .skip(end + MARKER.len())
+                .collect::<Vec<_>>(),
         )
-    )?;
-    Ok(
-        bytes.into_iter()
-            .skip(start)
-            .enumerate()
-            .take_while(|(index, _)| *index < end - start)
-            .map(|(_, byte)| byte)
-            .collect::<Vec<_>>()
-    )
+        .map_err(|v| {
+            anyhow!(
+                "Expected to find 8 bytes after the end marker, got {}",
+                v.len()
+            )
+        })?,
+    ))?;
+    Ok(bytes
+        .into_iter()
+        .skip(start)
+        .enumerate()
+        .take_while(|(index, _)| *index < end - start)
+        .map(|(_, byte)| byte)
+        .collect::<Vec<_>>())
 });
 
 /// Flash a Raspbian image onto the system's SDCard device, enable ssh access
 /// and set the hostname
 #[derive(Debug, FromArgs)]
-#[argh(subcommand, name="image")]
+#[argh(subcommand, name = "image")]
 pub(crate) struct Args {
     /// the hostname for the new image
     #[argh(positional)]
-    name: String
+    name: String,
 }
 
 pub(crate) fn main(args: &Args) -> Result<()> {
@@ -108,14 +121,16 @@ pub(crate) fn main(args: &Args) -> Result<()> {
     let password = utils::read_line()?;
 
     prompt!("Imaging (this may take a while)...");
-    File::create(SDPATH)?.write_all(RASPBIAN.as_ref().map_err(|e| anyhow!(e))?)?;
+    File::create(SDPATH)?
+        .write_all(RASPBIAN.as_ref().map_err(|e| anyhow!(e))?)?;
     println!("Done");
 
     prompt!("Setting up network & ssh...");
     with(BOOT_PARTITION, |path| {
         drop(File::create(path.join("ssh"))?);
 
-        let mut wpa_supplicant = File::create(path.join("wpa_supplicant.conf"))?;
+        let mut wpa_supplicant =
+            File::create(path.join("wpa_supplicant.conf"))?;
         write!(
             wpa_supplicant,
             "{}",
@@ -141,7 +156,8 @@ pub(crate) fn main(args: &Args) -> Result<()> {
         write!(hostname, "{}", args.name)?;
 
         let hosts = path.join("etc/hosts");
-        let contents = fs::read_to_string(&hosts)?.replace("raspberrypi", &args.name);
+        let contents =
+            fs::read_to_string(&hosts)?.replace("raspberrypi", &args.name);
         let mut hosts = File::create(hosts)?;
         write!(hosts, "{contents}")?;
 
@@ -152,7 +168,10 @@ pub(crate) fn main(args: &Args) -> Result<()> {
     Ok(())
 }
 
-fn with(partition: impl AsRef<Path>, f: impl FnOnce(&Path) -> Result<()>) -> Result<()> {
+fn with(
+    partition: impl AsRef<Path>,
+    f: impl FnOnce(&Path) -> Result<()>,
+) -> Result<()> {
     let tempdir = tempfile::tempdir()?;
     mount(partition, tempdir.path())?;
     let _umount = defer::defer(|| umount(tempdir.path()));
