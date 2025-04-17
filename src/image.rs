@@ -5,14 +5,15 @@ use std::{
     process::Command,
 };
 
-use anyhow::{anyhow, bail, Result};
+use anyhow::{Result, anyhow, bail};
 use argh::FromArgs;
+use command_ext::CommandExt;
 use nix::unistd::Uid;
 use once_cell::sync::Lazy;
 #[cfg(debug_assertions)]
 use sliding_windows as _;
 
-use crate::utils;
+use crate::utils::{self, Prompt};
 
 const SDPATH: &str = "/dev/sda";
 const BOOT_PARTITION: &str = "/dev/sda1";
@@ -100,7 +101,7 @@ pub(crate) struct Args {
     name: String,
 }
 
-pub(crate) fn main(args: &Args) -> Result<()> {
+pub(crate) fn main(Args { name }: Args) -> Result<()> {
     if !Uid::effective().is_root() {
         bail!("The image subcommand requires root permissions")
     }
@@ -109,8 +110,10 @@ pub(crate) fn main(args: &Args) -> Result<()> {
         bail!("{SDPATH} doesn't exist. Is the SDCard plugged in?")
     }
 
-    prompt!("WARNING: This command will overwrite the SDCard in {SDPATH}. Continue? [y/N]: ");
-    if utils::read_line()?.to_lowercase() != "y" {
+    prompt!(
+        "WARNING: This command will overwrite the SDCard in {SDPATH}. Continue? [y/N]: "
+    );
+    if utils::read_prompt(Prompt::No)?.is_no() {
         bail!("Aborted image operation")
     }
 
@@ -150,14 +153,14 @@ pub(crate) fn main(args: &Args) -> Result<()> {
     })?;
     println!("Done");
 
-    prompt!("Setting hostname to {}...", args.name);
+    prompt!("Setting hostname to {name}...");
     with(ROOT_PARTITION, |path| {
         let mut hostname = File::create(path.join("etc/hostname"))?;
-        write!(hostname, "{}", args.name)?;
+        write!(hostname, "{name}")?;
 
         let hosts = path.join("etc/hosts");
         let contents =
-            fs::read_to_string(&hosts)?.replace("raspberrypi", &args.name);
+            fs::read_to_string(&hosts)?.replace("raspberrypi", &name);
         let mut hosts = File::create(hosts)?;
         write!(hosts, "{contents}")?;
 
@@ -181,29 +184,12 @@ fn with(
 fn mount(src: impl AsRef<Path>, target: impl AsRef<Path>) -> Result<()> {
     let src = src.as_ref();
     let target = target.as_ref();
-    let result = Command::new("mount")
-        .args([src.as_os_str(), target.as_os_str()])
-        .status()?
-        .success();
-    if result {
-        Ok(())
-    } else {
-        bail!("mount {src:?} {target:?} failed")
-    }
+    Command::new("mount").args([src, target]).check_status()
 }
 
-fn umount<P: AsRef<Path>>(path: P) {
-    fn aux(path: &Path) -> Result<()> {
-        let result = Command::new("umount")
-            .arg(path.as_os_str())
-            .status()?
-            .success();
-        if result {
-            Ok(())
-        } else {
-            bail!("umount {path:?} failed")
-        }
-    }
-    let path = path.as_ref();
-    aux(path).unwrap_or_else(|e| panic!("{e}"));
+fn umount(path: impl AsRef<Path>) {
+    Command::new("umount")
+        .arg(path.as_ref())
+        .check_status()
+        .unwrap_or_else(|e| panic!("{e}"));
 }

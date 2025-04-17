@@ -2,13 +2,15 @@ use std::{
     collections::HashMap,
     fs::{self, File},
     io::{ErrorKind, Write as _},
+    net::Ipv4Addr,
     process::Command,
 };
 
-use anyhow::{anyhow, bail, Context, Result};
+use anyhow::{Context, Result, anyhow, bail};
 use argh::FromArgs;
+use command_ext::CommandExt;
 
-use crate::utils;
+use crate::{identity::Identity, utils};
 
 const SSH_DB: &str = "ssh_db";
 
@@ -21,8 +23,8 @@ pub(crate) struct Args {
     name: String,
 }
 
-pub(crate) fn main(args: &Args) -> Result<()> {
-    println!("{}", resolve(&args.name)?);
+pub(crate) fn main(Args { name }: Args) -> Result<()> {
+    println!("{}", resolve(name)?);
     Ok(())
 }
 
@@ -33,26 +35,27 @@ pub(crate) fn main(args: &Args) -> Result<()> {
 ///
 /// # Errors
 /// If the ssh or avahai processes can't be launched
-pub fn resolve(name: &str) -> Result<String> {
+pub fn resolve(name: impl AsRef<str>) -> Result<Ipv4Addr> {
+    let name = name.as_ref();
     let mut db = load_db().context("Failed to load IP Database")?;
     let need_new_ip = if let Some(ip) = db.get(name) {
-        !ssh_works(name, ip)?
+        !ssh_works(name, *ip)?
     } else {
         true
     };
 
     if need_new_ip {
-        drop(db.insert(
+        let _ = db.insert(
             String::from(name),
             probe(name).context("IP probe failed")?,
-        ));
+        );
     }
 
     save_db(&db).context("Failed to save IP Database")?;
-    Ok(db[name].clone())
+    Ok(db[name])
 }
 
-pub(crate) fn probe(name: &str) -> Result<String> {
+pub(crate) fn probe(name: &str) -> Result<Ipv4Addr> {
     loop {
         if let Some(result) = try_probe(name)? {
             return Ok(result);
@@ -60,37 +63,35 @@ pub(crate) fn probe(name: &str) -> Result<String> {
     }
 }
 
-fn ssh_works(name: &str, ip: &str) -> Result<bool> {
-    let output = utils::ssh_cmd(name, ip)?.arg("hostname").output()?;
-    Ok(output.status.success()
-        && String::from_utf8(output.stdout)?.trim() == name)
+fn ssh_works(name: &str, ip: Ipv4Addr) -> Result<bool> {
+    // Not using run_on_pi since we can't go through resolve
+    let output = Command::new("hostname")
+        .run_on_remote("pi", ip, Identity::private(name)?)
+        .check_output()?;
+    Ok(output.trim() == name)
 }
 
-fn try_probe(name: &str) -> Result<Option<String>> {
+fn try_probe(name: &str) -> Result<Option<Ipv4Addr>> {
     let hostname = format!("{name}.local");
-    let output = Command::new("avahi-resolve")
+    let stdout = Command::new("avahi-resolve")
         .args(["--name", &hostname])
-        .output()
-        .context("Unable to execute avahi-resolve")?;
-    if !output.status.success() {
-        bail!("avahi failed")
-    }
+        .check_output()?;
 
-    if output.stdout.is_empty() {
+    if stdout.is_empty() {
         return Ok(None);
     }
 
-    let parts = String::from_utf8(output.stdout)?
+    let parts = stdout
         .split_whitespace()
         .map(ToOwned::to_owned)
         .collect::<Vec<_>>();
     if parts.len() != 2 || parts[0] != hostname {
         bail!("Couldn't get IP Address for {name}")
     }
-    Ok(Some(parts[1].clone()))
+    Ok(Some(parts[1].parse()?))
 }
 
-fn load_db() -> Result<HashMap<String, String>> {
+fn load_db() -> Result<HashMap<String, Ipv4Addr>> {
     let db = utils::app_config()?.join(SSH_DB);
     let contents = match fs::read_to_string(&db) {
         Ok(contents) => contents,
@@ -109,12 +110,13 @@ fn load_db() -> Result<HashMap<String, String>> {
         if parts.len() != 2 {
             bail!("Invalid DB format")
         }
-        drop(result.insert(String::from(parts[0]), String::from(parts[1])));
+        let ip = parts[1].parse::<Ipv4Addr>()?;
+        let _ = result.insert(String::from(parts[0]), ip);
     }
     Ok(result)
 }
 
-fn save_db(db: &HashMap<String, String>) -> Result<()> {
+fn save_db(db: &HashMap<String, Ipv4Addr>) -> Result<()> {
     let mut file = File::create(utils::app_config()?.join(SSH_DB))?;
     for (name, ip) in db {
         writeln!(file, "{name} {ip}")?;

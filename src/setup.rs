@@ -1,9 +1,10 @@
-use std::path::PathBuf;
+use std::{path::PathBuf, process::Command};
 
-use anyhow::{bail, Result};
+use anyhow::{Result, bail};
 use argh::FromArgs;
+use command_ext::CommandExt as _;
 
-use crate::{push, utils};
+use crate::{CommandExt as _, push, utils};
 
 /// Deploy setup code to the pi
 #[derive(Debug, FromArgs)]
@@ -18,22 +19,29 @@ pub(crate) struct Args {
     script: Option<PathBuf>,
 }
 
-pub(crate) fn main(args: &Args) -> Result<()> {
+pub(crate) fn main(Args { name, script }: Args) -> Result<()> {
     let app_config = utils::app_config()?;
-    let script = args
-        .script
-        .clone()
-        .unwrap_or_else(|| app_config.join(format!("{}.sh", &args.name)));
+    let script =
+        script.unwrap_or_else(|| app_config.join(format!("{name}.sh")));
     if !script.is_file() {
         bail!("{} does not exist or isn't a file", script.display())
     }
     let target = format!("{}/pi.sh", utils::PI_CONFIG);
 
-    utils::ensure_pi_config(&args.name)?;
-    push::push(&args.name, &[script], &target)?;
-    ssh!(&args.name => "chmod", "+x", &target)?;
-    ssh!(&args.name => "sudo", &target, "root")?;
-    ssh!(&args.name => &target, &"user".to_owned())?;
-
+    utils::ensure_pi_config(&name)?;
+    push(&name, &[script], &target)?;
+    Command::new("chmod")
+        .args(["+x", &target])
+        .run_on_pi(&name)?
+        .check_status()?;
+    Command::new(&target)
+        .arg("root")
+        .run_as_root()
+        .run_on_pi(&name)?
+        .check_status()?;
+    Command::new(target)
+        .arg("user")
+        .run_on_pi(&name)?
+        .check_status()?;
     Ok(())
 }

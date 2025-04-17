@@ -5,10 +5,11 @@ use std::{
     process::Command,
 };
 
-use anyhow::{bail, Result};
+use anyhow::{Result, bail};
 use argh::FromArgs;
+use command_ext::CommandExt as _;
 
-use crate::{mount, push, utils};
+use crate::{CommandExt as _, mount, push, utils};
 
 /// Disable password ssh on the target pi
 #[derive(Debug, FromArgs)]
@@ -19,22 +20,22 @@ pub(crate) struct Args {
     name: String,
 }
 
-pub(crate) fn main(args: &Args) -> Result<()> {
-    let sshd = read_sshd(&args.name)?;
+pub(crate) fn main(Args { name }: Args) -> Result<()> {
+    let sshd = read_sshd(&name)?;
 
     let tempdir = tempfile::tempdir()?;
     let new_sshd_path = tempdir.path().join("sshd_config");
     let mut new_sshd = File::create(&new_sshd_path)?;
     writeln!(new_sshd, "{sshd}\nPasswordAuthentication no")?;
 
-    utils::ensure_pi_config(&args.name)?;
-    push::push(&args.name, &[new_sshd_path], utils::PI_CONFIG)?;
-    ssh!(
-        &args.name =>
-            "sudo", "mv", &format!("{}/sshd_config", utils::PI_CONFIG), "/etc/ssh/sshd_config"
-    )?;
-
-    Ok(())
+    utils::ensure_pi_config(&name)?;
+    push(&name, &[new_sshd_path], utils::PI_CONFIG)?;
+    Command::new("mv")
+        .arg(format!("{}/sshd_config", utils::PI_CONFIG))
+        .arg("/etc/ssh/sshd_config")
+        .run_as_root()
+        .run_on_pi(&name)?
+        .check_status()
 }
 
 fn read_sshd(name: &str) -> Result<String> {

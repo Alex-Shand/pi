@@ -1,13 +1,14 @@
 use std::{
-    ffi::{OsStr, OsString},
-    path::PathBuf,
+    ffi::OsString,
+    path::{Path, PathBuf},
     process::Command,
 };
 
-use anyhow::{bail, Result};
+use anyhow::Result;
 use argh::FromArgs;
+use command_ext::CommandExt;
 
-use crate::{resolve, utils::CommandExt as _};
+use crate::{identity::Identity, resolve};
 
 /// Mount a directory from a pi locally
 #[derive(Debug, FromArgs)]
@@ -24,27 +25,39 @@ pub(crate) struct Args {
     mount: PathBuf,
 }
 
-pub(crate) fn main(args: &Args) -> Result<()> {
-    mount(&args.name, &args.source, &args.mount)
+pub(crate) fn main(
+    Args {
+        name,
+        source,
+        mount,
+    }: Args,
+) -> Result<()> {
+    self::mount(name, source, mount)
 }
 
 /// Mount a directory from the pi locally using sshfs
+///
+/// # Errors
+///
 pub fn mount(
-    name: &str,
-    src: impl AsRef<OsStr>,
-    dst: impl AsRef<OsStr>,
+    name: impl AsRef<str>,
+    src: impl AsRef<Path>,
+    dst: impl AsRef<Path>,
 ) -> Result<()> {
+    let name = name.as_ref();
     let ip = resolve(name)?;
     let mut full_src = OsString::from(format!("pi@{ip}:"));
-    full_src.push(src);
-    let success = Command::new("sshfs")
-        .identity_alt(name)?
+    full_src.push(src.as_ref());
+    Command::new("sshfs")
+        .arg("-o")
+        .arg(identity(name)?)
         .arg(full_src)
-        .arg(dst)
-        .status()?
-        .success();
-    if !success {
-        bail!("sshfs failed")
-    }
-    Ok(())
+        .arg(dst.as_ref())
+        .check_status()
+}
+
+fn identity(name: &str) -> Result<OsString> {
+    let mut arg = OsString::from("IdentityFile=");
+    arg.push(Identity::private(name)?);
+    Ok(arg)
 }

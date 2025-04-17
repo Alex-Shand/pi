@@ -1,34 +1,24 @@
-use crate::identity::Identity;
-
-use std::fs;
-use std::path::PathBuf;
-use std::process::Command;
-use std::ffi::OsString;
-use std::borrow::Borrow;
+use std::{borrow::Borrow, fs, path::PathBuf, process::Command};
 
 use anyhow::{Result, bail};
+use command_ext::CommandExt as _;
+
+use crate::CommandExt as _;
 
 pub(crate) const PI_CONFIG: &str = "/home/pi/.pi";
 
-pub(crate) enum DefaultPrompt {
+pub(crate) enum Prompt {
     Yes,
-    No
+    No,
 }
 
-pub(crate) trait CommandExt {
-    fn identity(&mut self, name: &str) -> Result<&mut Self>;
-    fn identity_alt(&mut self, name: &str) -> Result<&mut Self>;
-}
-
-impl CommandExt for Command {
-    fn identity(&mut self, name: &str) -> Result<&mut Self> {
-        Ok(self.arg("-i").arg(identity(name)?.private))
+impl Prompt {
+    pub(crate) fn is_yes(&self) -> bool {
+        matches!(self, Prompt::Yes)
     }
 
-    fn identity_alt(&mut self, name: &str) -> Result<&mut Self> {
-        let mut identity_arg = OsString::from("IdentityFile=");
-        identity_arg.push(identity(name)?.private);
-        Ok(self.arg("-o").arg(identity_arg))
+    pub(crate) fn is_no(&self) -> bool {
+        matches!(self, Prompt::No)
     }
 }
 
@@ -51,15 +41,12 @@ pub(crate) fn app_config() -> Result<PathBuf> {
     Ok(path)
 }
 
-pub(crate) fn ssh_cmd(name: &str, ip: &str) -> Result<Command> {
-    let mut cmd = Command::new("ssh");
-    let _ = cmd.identity(name)?;
-    let _ = cmd.arg(format!("pi@{ip}"));
-    Ok(cmd)
-}
-
 pub(crate) fn ensure_pi_config(name: &str) -> Result<()> {
-    Ok(ssh!(name => "mkdir", "-p", PI_CONFIG)?)
+    Command::new("mkdir")
+        .arg("-p")
+        .arg(PI_CONFIG)
+        .run_on_pi(name)?
+        .check_status()
 }
 
 pub(crate) fn read_line() -> Result<String> {
@@ -68,24 +55,21 @@ pub(crate) fn read_line() -> Result<String> {
     Ok(String::from(buf.trim()))
 }
 
-pub(crate) fn read_prompt(default: impl Borrow<DefaultPrompt>) -> Result<bool> {
-    let response = read_line()?.to_lowercase().chars().next().expect("Should at least be a newline...");
-    Ok(match default.borrow() {
-        DefaultPrompt::Yes => response != 'n',
-        DefaultPrompt::No => response == 'y'
-    })
+pub(crate) fn read_prompt(default: impl Borrow<Prompt>) -> Result<Prompt> {
+    let response = read_line()?
+        .to_lowercase()
+        .chars()
+        .next()
+        .expect("Should at least be a newline...");
+    let is_yes = match default.borrow() {
+        Prompt::Yes => response != 'n',
+        Prompt::No => response == 'y',
+    };
+    Ok(if is_yes { Prompt::Yes } else { Prompt::No })
 }
 
 #[allow(clippy::cast_sign_loss)]
 #[allow(clippy::cast_possible_truncation)]
 pub(crate) fn truncate(x: i32) -> u8 {
     x as u8
-}
-
-fn identity(name: &str) -> Result<Identity> {
-    let identity = Identity::new(name)?;
-    if !identity.exists() {
-        bail!("No identity file for {name}")
-    }
-    Ok(identity)
 }
