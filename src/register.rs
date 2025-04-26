@@ -122,5 +122,6 @@ fn send_id(id: &Identity<Created>, ip: Ipv4Addr) -> Result<()> {
         .arg("-i")
         .arg(&id.public)
         .arg(format!("pi@{ip}"))
-        .check_status()
+        .check_status()?;
+    Ok(())
 }

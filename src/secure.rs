@@ -35,7 +35,8 @@ pub(crate) fn main(Args { name }: Args) -> Result<()> {
         .arg("/etc/ssh/sshd_config")
         .run_as_root()
         .run_on_pi(&name)?
-        .check_status()
+        .check_status()?;
+    Ok(())
 }
 
 fn read_sshd(name: &str) -> Result<String> {

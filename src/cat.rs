@@ -29,8 +29,9 @@ pub(crate) fn main(Args { name, path }: Args) -> Result<()> {
 /// # Errors
 ///
 pub fn cat(name: impl AsRef<str>, path: impl AsRef<Path>) -> Result<String> {
-    Command::new("cat")
+    let result = Command::new("cat")
         .arg(path.as_ref())
         .run_on_pi(name.as_ref())?
-        .check_output()
+        .check_output()?;
+    Ok(result)
 }

@@ -184,7 +184,8 @@ fn with(
 fn mount(src: impl AsRef<Path>, target: impl AsRef<Path>) -> Result<()> {
     let src = src.as_ref();
     let target = target.as_ref();
-    Command::new("mount").args([src, target]).check_status()
+    Command::new("mount").args([src, target]).check_status()?;
+    Ok(())
 }
 
 fn umount(path: impl AsRef<Path>) {

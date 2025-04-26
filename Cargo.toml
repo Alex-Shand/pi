@@ -8,7 +8,7 @@ edition = "2024"
 [dependencies]
 anyhow = "1.0.69"
 argh = "0.1.7"
-command-ext = { version = "0.1.0", path = "../command-ext" }
+command-ext = { git = "https://github.com/Alex-Shand/command-ext.git" }
 defer = "0.1.0"
 home = "0.5.3"
 nix = "0.24.1"

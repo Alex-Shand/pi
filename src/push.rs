@@ -50,5 +50,6 @@ pub fn push(
         .arg(Identity::private(name)?)
         .args(files.iter().map(AsRef::as_ref))
         .arg(full_dst)
-        .check_status()
+        .check_status()?;
+    Ok(())
 }

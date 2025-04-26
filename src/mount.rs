@@ -53,7 +53,8 @@ pub fn mount(
         .arg(identity(name)?)
         .arg(full_src)
         .arg(dst.as_ref())
-        .check_status()
+        .check_status()?;
+    Ok(())
 }
 
 fn identity(name: &str) -> Result<OsString> {

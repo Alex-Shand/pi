@@ -46,7 +46,8 @@ pub(crate) fn ensure_pi_config(name: &str) -> Result<()> {
         .arg("-p")
         .arg(PI_CONFIG)
         .run_on_pi(name)?
-        .check_status()
+        .check_status()?;
+    Ok(())
 }
 
 pub(crate) fn read_line() -> Result<String> {

@@ -57,5 +57,6 @@ pub fn pull(
         .arg(Identity::private(name)?)
         .arg(full_src)
         .arg(dst.as_ref())
-        .check_status()
+        .check_status()?;
+    Ok(())
 }
