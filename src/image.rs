@@ -3,13 +3,13 @@ use std::{
     io::{Read as _, Write as _},
     path::{Path, PathBuf},
     process::Command,
+    sync::LazyLock,
 };
 
 use anyhow::{Result, anyhow, bail};
 use argh::FromArgs;
 use command_ext::CommandExt;
 use nix::unistd::Uid;
-use once_cell::sync::Lazy;
 #[cfg(debug_assertions)]
 use sliding_windows as _;
 
@@ -31,7 +31,7 @@ const WIFI: &str = "country=GB\n\
 const USERCONF: &str = "pi:$6$0tJ78aVORQEk8spk$LT66yvA.gwx7jGxJFBSoQF7GTeJDzrqJNuQWdHg8y05917vCWHVqb9ECH0EDspGT7zJz81Z8Rs6vD0Cq3Kthb1";
 
 #[cfg(debug_assertions)]
-static RASPBIAN: Lazy<Result<Vec<u8>>> = Lazy::new(|| {
+static RASPBIAN: LazyLock<Result<Vec<u8>>> = LazyLock::new(|| {
     Ok(File::open(env!("IMAGE"))?
         .bytes()
         .collect::<Result<Vec<_>, _>>()?)
