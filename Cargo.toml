@@ -11,7 +11,7 @@ argh = "0.1.7"
 command-ext = { git = "https://github.com/Alex-Shand/command-ext.git" }
 defer = "0.1.0"
 home = "0.5.3"
-nix = "0.30.1"
+nix = { version = "0.30.1", features = ["user"] }
 once_cell = "1.12.0"
 sealed = "0.6.0"
 sliding_windows = "3.0.0"
