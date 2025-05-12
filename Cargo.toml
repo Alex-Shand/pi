@@ -7,7 +7,7 @@ edition = "2024"
 
 [dependencies]
 anyhow = "1.0.98"
-argh = "0.1.7"
+argh = "0.1.13"
 command-ext = { git = "https://github.com/Alex-Shand/command-ext.git" }
 defer = "0.1.0"
 home = "0.5.11"
