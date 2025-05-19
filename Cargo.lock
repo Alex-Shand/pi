@@ -76,7 +76,7 @@ checksum = "613afe47fcd5fac7ccf1db93babcb082c5994d996f20b8b159f2ad1658eb5724"
 [[package]]
 name = "command-ext"
 version = "0.1.0"
-source = "git+https://github.com/Alex-Shand/command-ext.git#b9b13f6ab06380989f8cc8ea012e4833c7044bb8"
+source = "git+https://github.com/Alex-Shand/command-ext.git#854339c7c216828e59704e980b31621329f19e73"
 dependencies = [
  "camino",
  "errors",
@@ -118,7 +118,7 @@ dependencies = [
 [[package]]
 name = "errors"
 version = "0.1.0"
-source = "git+https://github.com/Alex-Shand/errors.git#c5ea7bc8e9d6e3a6dc1fa4074bc342c04b5c7d28"
+source = "git+https://github.com/Alex-Shand/errors.git#8e7a34282c768c6e6b391733127bd60cb05bc6f4"
 dependencies = [
  "errors-macros",
  "snafu",
@@ -127,7 +127,7 @@ dependencies = [
 [[package]]
 name = "errors-macros"
 version = "0.1.0"
-source = "git+https://github.com/Alex-Shand/errors.git#c5ea7bc8e9d6e3a6dc1fa4074bc342c04b5c7d28"
+source = "git+https://github.com/Alex-Shand/errors.git#8e7a34282c768c6e6b391733127bd60cb05bc6f4"
 dependencies = [
  "proc",
 ]
@@ -241,7 +241,7 @@ dependencies = [
 [[package]]
 name = "proc"
 version = "0.1.0"
-source = "git+https://github.com/Alex-Shand/proc.git#bc4a9f0d8e34f4e8344cad93e3627048bf110a72"
+source = "git+https://github.com/Alex-Shand/proc.git#1368662f5de4a18fdc663efb86b0e772513c6a75"
 dependencies = [
  "proc_attribute",
  "proc_common",
@@ -271,7 +271,7 @@ dependencies = [
 [[package]]
 name = "proc_attribute"
 version = "0.1.0"
-source = "git+https://github.com/Alex-Shand/proc.git#bc4a9f0d8e34f4e8344cad93e3627048bf110a72"
+source = "git+https://github.com/Alex-Shand/proc.git#1368662f5de4a18fdc663efb86b0e772513c6a75"
 dependencies = [
  "proc_common",
 ]
@@ -279,7 +279,7 @@ dependencies = [
 [[package]]
 name = "proc_common"
 version = "0.1.0"
-source = "git+https://github.com/Alex-Shand/proc.git#bc4a9f0d8e34f4e8344cad93e3627048bf110a72"
+source = "git+https://github.com/Alex-Shand/proc.git#1368662f5de4a18fdc663efb86b0e772513c6a75"
 dependencies = [
  "proc-macro-crate",
  "proc-macro2",
@@ -291,7 +291,7 @@ dependencies = [
 [[package]]
 name = "proc_derive"
 version = "0.1.0"
-source = "git+https://github.com/Alex-Shand/proc.git#bc4a9f0d8e34f4e8344cad93e3627048bf110a72"
+source = "git+https://github.com/Alex-Shand/proc.git#1368662f5de4a18fdc663efb86b0e772513c6a75"
 dependencies = [
  "convert_case",
  "proc_attribute",
@@ -301,7 +301,7 @@ dependencies = [
 [[package]]
 name = "proc_function"
 version = "0.1.0"
-source = "git+https://github.com/Alex-Shand/proc.git#bc4a9f0d8e34f4e8344cad93e3627048bf110a72"
+source = "git+https://github.com/Alex-Shand/proc.git#1368662f5de4a18fdc663efb86b0e772513c6a75"
 dependencies = [
  "proc_attribute",
  "proc_common",
@@ -310,7 +310,7 @@ dependencies = [
 [[package]]
 name = "proc_parse"
 version = "0.1.0"
-source = "git+https://github.com/Alex-Shand/proc.git#bc4a9f0d8e34f4e8344cad93e3627048bf110a72"
+source = "git+https://github.com/Alex-Shand/proc.git#1368662f5de4a18fdc663efb86b0e772513c6a75"
 dependencies = [
  "proc_common",
  "proc_derive",
@@ -361,6 +361,12 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "2b15c43186be67a4fd63bee50d0303afffcef381492ebe2c5d87f324e1b8815c"
 
 [[package]]
+name = "rust-fuzzy-search"
+version = "0.1.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "a157657054ffe556d8858504af8a672a054a6e0bd9e8ee531059100c0fa11bb2"
+
+[[package]]
 name = "rustix"
 version = "1.0.7"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -372,12 +378,6 @@ dependencies = [
  "linux-raw-sys",
  "windows-sys",
 ]
-
-[[package]]
-name = "rust-fuzzy-search"
-version = "0.1.1"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "a157657054ffe556d8858504af8a672a054a6e0bd9e8ee531059100c0fa11bb2"
 
 [[package]]
 name = "sealed"
