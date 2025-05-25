@@ -38,7 +38,7 @@ static RASPBIAN: LazyLock<Result<Vec<u8>>> = LazyLock::new(|| {
 });
 
 #[cfg(not(debug_assertions))]
-static RASPBIAN: Lazy<Result<Vec<u8>>> = Lazy::new(|| {
+static RASPBIAN: LazyLock<Result<Vec<u8>>> = LazyLock::new(|| {
     use std::env;
 
     use sliding_windows::{IterExt as _, Storage};
