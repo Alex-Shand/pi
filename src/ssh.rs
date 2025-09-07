@@ -3,7 +3,7 @@ use std::process::{Command, ExitStatus};
 use anyhow::Result;
 use argh::FromArgs;
 
-use crate::CommandExt as _;
+use crate::{CommandExt as _, Identity, resolve};
 
 /// SSH wrapper for managed pis
 #[derive(Debug, FromArgs)]
@@ -17,12 +17,15 @@ pub(crate) struct Args {
 }
 
 pub(crate) fn main(Args { name, cmd }: Args) -> Result<ExitStatus> {
-    let mut cmd = if let Some((cmd, args)) = cmd.split_first() {
-        let mut cmd = Command::new(cmd);
-        let _ = cmd.args(args);
-        cmd
+    if let Some((cmd, args)) = cmd.split_first() {
+        Ok(Command::new(cmd).args(args).run_on_pi(&name)?.status()?)
     } else {
-        Command::new("sh")
-    };
-    Ok(cmd.run_on_pi(&name)?.status()?)
+        let ip = resolve(&name)?;
+        let key_file = Identity::private(name)?;
+        Ok(Command::new("ssh")
+            .arg("-i")
+            .arg(key_file)
+            .arg(format!("pi@{ip}"))
+            .status()?)
+    }
 }

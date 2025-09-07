@@ -38,10 +38,10 @@ pub(crate) fn main(Args { name }: Args) -> Result<()> {
     println!("Done");
 
     let mut known_hosts = read_known_hosts()?;
-    if known_hosts.contains_key(&ip) {
+    if known_hosts.contains_key(&ip.to_string()) {
         prompt!("IP Address {ip} is already in known_hosts, remove?: [Y/n]: ");
         if utils::read_prompt(Prompt::Yes)?.is_yes() {
-            drop(known_hosts.remove(&ip));
+            drop(known_hosts.remove(&ip.to_string()));
             write_known_hosts(known_hosts)?;
         }
     }
@@ -88,7 +88,7 @@ fn generate_id(name: &str, id: Identity<Unknown>) -> Result<Identity<Created>> {
         .expect("Identity should exist because we just created it"))
 }
 
-fn read_known_hosts() -> Result<HashMap<Ipv4Addr, Vec<String>>> {
+fn read_known_hosts() -> Result<HashMap<String, Vec<String>>> {
     let text =
         fs::read_to_string(utils::home()?.join(".ssh").join("known_hosts"))?;
     Ok(text
@@ -97,16 +97,16 @@ fn read_known_hosts() -> Result<HashMap<Ipv4Addr, Vec<String>>> {
         .collect::<Option<Vec<_>>>()
         .ok_or_else(|| anyhow!("Failed to parse known_hosts"))?
         .into_iter()
-        .map(|(ip, key)| Ok((ip.parse::<Ipv4Addr>()?, key)))
+        .map(|(ip, key)| Ok((ip, key)))
         .collect::<Result<Vec<_>>>()?
         .into_iter()
         .fold(HashMap::new(), |mut map, (ip, key)| {
-            map.entry(ip).or_default().push(key.to_string());
+            map.entry(ip.to_string()).or_default().push(key.to_string());
             map
         }))
 }
 
-fn write_known_hosts(data: HashMap<Ipv4Addr, Vec<String>>) -> Result<()> {
+fn write_known_hosts(data: HashMap<String, Vec<String>>) -> Result<()> {
     let mut known_hosts =
         File::create(utils::home()?.join(".ssh").join("known_hosts"))?;
     for (ip, keys) in data {
