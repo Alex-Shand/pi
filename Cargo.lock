@@ -76,7 +76,7 @@ checksum = "613afe47fcd5fac7ccf1db93babcb082c5994d996f20b8b159f2ad1658eb5724"
 [[package]]
 name = "command-ext"
 version = "0.1.0"
-source = "git+https://github.com/Alex-Shand/command-ext.git#d3dadfc40c2fed98d47fab4e0fee5abf66741f24"
+source = "git+https://github.com/Alex-Shand/command-ext.git#0c65d2481b445e7fc8cfa0196334a03190732606"
 dependencies = [
  "camino",
  "errors",
@@ -118,7 +118,7 @@ dependencies = [
 [[package]]
 name = "errors"
 version = "0.1.0"
-source = "git+https://github.com/Alex-Shand/errors.git#070d906ee5fce6ce9411e090bbfb8a82960c4838"
+source = "git+https://github.com/Alex-Shand/errors.git#c1e7c7168cf39f27dde48b3c1fdd000299b64487"
 dependencies = [
  "errors-macros",
  "snafu",
@@ -127,7 +127,7 @@ dependencies = [
 [[package]]
 name = "errors-macros"
 version = "0.1.0"
-source = "git+https://github.com/Alex-Shand/errors.git#070d906ee5fce6ce9411e090bbfb8a82960c4838"
+source = "git+https://github.com/Alex-Shand/errors.git#c1e7c7168cf39f27dde48b3c1fdd000299b64487"
 dependencies = [
  "proc",
 ]
