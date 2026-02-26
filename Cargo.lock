@@ -56,9 +56,9 @@ checksum = "2261d10cca569e4643e526d8dc2e62e433cc8aba21ab764233731f8d369bf394"
 
 [[package]]
 name = "camino"
-version = "1.2.1"
+version = "1.2.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "276a59bf2b2c967788139340c9f0c5b12d7fd6630315c15c217e559de85d2609"
+checksum = "e629a66d692cb9ff1a1c664e41771b3dcaf961985a9774c0eb0bd1b51cf60a48"
 
 [[package]]
 name = "cfg-if"
@@ -75,7 +75,7 @@ checksum = "613afe47fcd5fac7ccf1db93babcb082c5994d996f20b8b159f2ad1658eb5724"
 [[package]]
 name = "command-ext"
 version = "0.1.0"
-source = "git+https://github.com/Alex-Shand/command-ext.git#0b797578f23ff9c1221bef15e014b68189606602"
+source = "git+https://github.com/Alex-Shand/command-ext.git#637cbcd063cf5bdb3e67c954b2885e8e4a6180c3"
 dependencies = [
  "camino",
  "errors",
@@ -117,7 +117,7 @@ dependencies = [
 [[package]]
 name = "errors"
 version = "0.1.0"
-source = "git+https://github.com/Alex-Shand/errors.git#13863c4ceaf36acb0308799d7f9f240783f268ae"
+source = "git+https://github.com/Alex-Shand/errors.git#3dd764c978cf411c30dd132cc51e432e114282ed"
 dependencies = [
  "errors-macros",
  "snafu",
@@ -126,7 +126,7 @@ dependencies = [
 [[package]]
 name = "errors-macros"
 version = "0.1.0"
-source = "git+https://github.com/Alex-Shand/errors.git#13863c4ceaf36acb0308799d7f9f240783f268ae"
+source = "git+https://github.com/Alex-Shand/errors.git#3dd764c978cf411c30dd132cc51e432e114282ed"
 dependencies = [
  "proc",
 ]
@@ -240,7 +240,7 @@ dependencies = [
 [[package]]
 name = "proc"
 version = "0.1.0"
-source = "git+https://github.com/Alex-Shand/proc.git#69a92f5cb9cc502b91ba651df2be579bb053cec6"
+source = "git+https://github.com/Alex-Shand/proc.git#90419cd8ec3fc395799eda46198cce81e9e870d1"
 dependencies = [
  "proc_attribute",
  "proc_common",
@@ -270,7 +270,7 @@ dependencies = [
 [[package]]
 name = "proc_attribute"
 version = "0.1.0"
-source = "git+https://github.com/Alex-Shand/proc.git#69a92f5cb9cc502b91ba651df2be579bb053cec6"
+source = "git+https://github.com/Alex-Shand/proc.git#90419cd8ec3fc395799eda46198cce81e9e870d1"
 dependencies = [
  "proc_common",
 ]
@@ -278,7 +278,7 @@ dependencies = [
 [[package]]
 name = "proc_common"
 version = "0.1.0"
-source = "git+https://github.com/Alex-Shand/proc.git#69a92f5cb9cc502b91ba651df2be579bb053cec6"
+source = "git+https://github.com/Alex-Shand/proc.git#90419cd8ec3fc395799eda46198cce81e9e870d1"
 dependencies = [
  "proc-macro-crate",
  "proc-macro2",
@@ -290,7 +290,7 @@ dependencies = [
 [[package]]
 name = "proc_derive"
 version = "0.1.0"
-source = "git+https://github.com/Alex-Shand/proc.git#69a92f5cb9cc502b91ba651df2be579bb053cec6"
+source = "git+https://github.com/Alex-Shand/proc.git#90419cd8ec3fc395799eda46198cce81e9e870d1"
 dependencies = [
  "convert_case",
  "proc_attribute",
@@ -300,7 +300,7 @@ dependencies = [
 [[package]]
 name = "proc_function"
 version = "0.1.0"
-source = "git+https://github.com/Alex-Shand/proc.git#69a92f5cb9cc502b91ba651df2be579bb053cec6"
+source = "git+https://github.com/Alex-Shand/proc.git#90419cd8ec3fc395799eda46198cce81e9e870d1"
 dependencies = [
  "proc_attribute",
  "proc_common",
@@ -309,7 +309,7 @@ dependencies = [
 [[package]]
 name = "proc_parse"
 version = "0.1.0"
-source = "git+https://github.com/Alex-Shand/proc.git#69a92f5cb9cc502b91ba651df2be579bb053cec6"
+source = "git+https://github.com/Alex-Shand/proc.git#90419cd8ec3fc395799eda46198cce81e9e870d1"
 dependencies = [
  "proc_common",
  "proc_derive",
@@ -442,9 +442,9 @@ dependencies = [
 
 [[package]]
 name = "syn"
-version = "2.0.116"
+version = "2.0.117"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "3df424c70518695237746f84cede799c9c58fcb37450d7b23716568cc8bc69cb"
+checksum = "e665b8803e7b1d2a727f4023456bbbbe74da67099c585258af0ad9c5013b9b99"
 dependencies = [
  "proc-macro2",
  "quote",
