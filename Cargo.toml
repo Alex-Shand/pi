@@ -13,5 +13,5 @@ defer = "0.2.1"
 home = "0.5.12"
 nix = { version = "0.31.2", features = ["user"] }
 sealed = "0.6.0"
-sliding_windows = "3.0.0"
+sliding_windows = "3.0.1"
 tempfile = "3.27.0"

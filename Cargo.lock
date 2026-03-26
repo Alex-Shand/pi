@@ -425,9 +425,9 @@ dependencies = [
 
 [[package]]
 name = "sliding_windows"
-version = "3.0.0"
+version = "3.0.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "a830e5d74dce35884bac85ecdc68c1ae96b9451918cc484f39340049c7a55f5e"
+checksum = "a653f7bd87ea6099dad08a4a660c474dafa25fb701648b3f4d0c78dea6e63443"
 
 [[package]]
 name = "snafu"
