@@ -75,7 +75,7 @@ checksum = "613afe47fcd5fac7ccf1db93babcb082c5994d996f20b8b159f2ad1658eb5724"
 [[package]]
 name = "command-ext"
 version = "0.1.0"
-source = "git+https://github.com/Alex-Shand/command-ext.git#22bd26168fa065bef07c289b8fbdacb78fde9eb3"
+source = "git+https://github.com/Alex-Shand/command-ext.git#611aeeb795c56d35fe300b58e9d8dbfdf3c4bcad"
 dependencies = [
  "camino",
  "errors",
