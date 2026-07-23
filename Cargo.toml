@@ -12,6 +12,6 @@ command-ext = { git = "https://github.com/Alex-Shand/command-ext.git" }
 defer = "0.2.1"
 home = "0.5.12"
 nix = { version = "0.31.3", features = ["user"] }
-sealed = "0.6.0"
+sealed = "0.7.0"
 sliding_windows = "3.0.1"
 tempfile = "3.27.0"
