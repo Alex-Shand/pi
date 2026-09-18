@@ -3,7 +3,7 @@ on:
   push:
 jobs:
   cache:
-    runs-on: ubuntu-latest-arm
+    runs-on: ubuntu-26.04-arm
     steps:
       - uses: actions/checkout@v4
       - uses: cachix/install-nix-action@v25
