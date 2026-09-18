@@ -15,4 +15,6 @@ jobs:
         with:
           name: "1"
           authToken: '${{ secrets.CACHIX_AUTH_TOKEN }}'
+      - run: df -h
       - run: nix build --print-build-logs 'path:nix/.#kernels'
+      - run: df -h
