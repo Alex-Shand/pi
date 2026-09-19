@@ -4,15 +4,15 @@ on:
 jobs:
   cache:
     runs-on: ubuntu-26.04-arm
-    # env:
-    #   TMPDIR: /nix/build
+    env:
+      TMPDIR: /nix/build
     steps:
       - uses: actions/checkout@v4
-      # - uses: wimpysworld/nothing-but-nix@main
-      #   with:
-      #     hatchet-protocol: 'cleave'
-      #     witness-carnage: true
-      #     nix-permission-edict: true
+      - uses: wimpysworld/nothing-but-nix@main
+        with:
+          hatchet-protocol: 'cleave'
+          witness-carnage: true
+          nix-permission-edict: true
       - uses: cachix/install-nix-action@v25
         with:
           nix_path: nixpkgs=channel:nixos-26.05
@@ -32,7 +32,7 @@ jobs:
       - run: df -h && df -i
       - run: |
           nix profile install --accept-flake-config nixpkgs#cachix
-          cachix watch-exec 1 -- nix build --impure --no-sandbox --print-build-logs 'path:nix/.#test'
+          cachix watch-exec 1 -- nix build --impure --no-sandbox --print-build-logs 'path:nix/.#backup-kernel'
         env:
           TMPDIR: /nix/build
           CACHIX_AUTH_TOKEN: ${{ secrets.CACHIX_AUTH_TOKEN }}
