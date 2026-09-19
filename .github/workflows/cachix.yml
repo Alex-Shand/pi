@@ -22,6 +22,8 @@ jobs:
           name: "1"
           authToken: '${{ secrets.CACHIX_AUTH_TOKEN }}'
       - run: df -h && df -i
-      - run: nix build --print-build-logs 'path:nix/.#kernels'
+      - run: nix build --impure --print-build-logs 'path:nix/.#kernels'
+        env:
+            TMPDIR: /nix/build
       - run: df -h && df -i
         if: always()
