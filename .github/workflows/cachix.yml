@@ -18,6 +18,8 @@ jobs:
       - uses: cachix/install-nix-action@v25
         with:
           nix_path: nixpkgs=channel:nixos-26.05
+          extra_nix_config: |
+            build-dir = /nix/build
       - uses: cachix/cachix-action@v14
         with:
           name: "1"
