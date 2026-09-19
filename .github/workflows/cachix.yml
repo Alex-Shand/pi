@@ -34,7 +34,7 @@ jobs:
           ls -la /build
           stat /nix/build
       - run: df -h && df -i
-      - run: nix build --impure --print-build-logs 'path:nix/.#kernels'
+      - run: nix build --impure --no-sandbox --print-build-logs 'path:nix/.#kernels'
         env:
             TMPDIR: /nix/build
       - run: df -h && df -i
