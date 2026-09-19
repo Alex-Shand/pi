@@ -48,11 +48,12 @@
       in {
         packages = {
           admire = admire.image;
+          admire-kernel = admire.kernel;
+
           backup = backup.image;
-          kernels = nixpkgs.legacyPackages.${system}.symlinkJoin {
-            name = "kernels";
-            paths = [ admire.kernel backup.kernel ];
-          };
+          backup-kernel = backup.kernel;
+
+          test = nixpkgs.legacyPackages.${system}.hello;
         };
       });
 }
