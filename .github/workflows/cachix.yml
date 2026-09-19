@@ -10,7 +10,6 @@ jobs:
         with:
           hatchet-protocol: 'cleave'
           witness-carnage: true
-      - run: mkdir -p /nix/build && chmod 777 /nix/build
       - uses: cachix/install-nix-action@v25
         with:
           nix_path: nixpkgs=channel:nixos-26.05
