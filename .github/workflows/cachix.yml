@@ -27,6 +27,12 @@ jobs:
       - run: sudo mkdir -p /nix/build
       - run: sudo chown -R $(whoami):$(whoami) /nix/build
       - run: sudo chmod 755 /nix/build
+      - run: |
+          whoami
+          id
+          ls -la /nix/build
+          ls -la /build
+          stat /nix/build
       - run: df -h && df -i
       - run: nix build --impure --print-build-logs 'path:nix/.#kernels'
         env:
