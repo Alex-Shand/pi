@@ -18,10 +18,12 @@ jobs:
           nix_path: nixpkgs=channel:nixos-26.05
           extra_nix_config: |
             sandbox = false
-            build-dir = /nix/build      
+            temp-dir = /nix/build      
       - run: |
           sudo mkdir -p /nix/build
           sudo chmod 777 /nix/build
+          sudo rm -rf /tmp
+          sudo ln -s /nix/build /tmp
           echo "TMPDIR=/nix/build" >> $GITHUB_ENV
       - run: |
           whoami
