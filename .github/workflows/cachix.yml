@@ -12,6 +12,7 @@ jobs:
         with:
           hatchet-protocol: 'cleave'
           witness-carnage: true
+          nix-permission-edict: true
       - run: sudo rm -rf /build
       - run: sudo ln -s /nix/build /build
       - uses: cachix/install-nix-action@v25
