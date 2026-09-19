@@ -22,7 +22,7 @@ jobs:
       - run: |
           sudo mkdir -p /nix/build
           sudo chmod 777 /nix/build
-          sudo rm -rf /tmp
+          sudo umount /tmp
           sudo ln -s /nix/build /tmp
           echo "TMPDIR=/nix/build" >> $GITHUB_ENV
       - run: |
