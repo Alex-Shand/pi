@@ -34,7 +34,7 @@ jobs:
         env:
             TMPDIR: /nix/build
       - run: |
-          OUTPUTS=$(nix eval --raw '.#test' --apply 'x: builtins.concatStringsSep " " (builtins.attrValues x)')
+          OUTPUTS=$(nix eval --raw 'path:nix/.#test' --apply 'x: builtins.concatStringsSep " " (builtins.attrValues x)')
           for path in $OUTPUTS; do
             cachix push "1" "$path"
           done
