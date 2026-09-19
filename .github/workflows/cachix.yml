@@ -8,11 +8,11 @@ jobs:
       TMPDIR: /nix/build
     steps:
       - uses: actions/checkout@v4
-      - uses: wimpysworld/nothing-but-nix@main
-        with:
-          hatchet-protocol: 'cleave'
-          witness-carnage: true
-          nix-permission-edict: true
+      # - uses: wimpysworld/nothing-but-nix@main
+      #   with:
+      #     hatchet-protocol: 'cleave'
+      #     witness-carnage: true
+      #     nix-permission-edict: true
       - uses: cachix/install-nix-action@v25
         with:
           nix_path: nixpkgs=channel:nixos-26.05
@@ -30,15 +30,9 @@ jobs:
           ls -la /nix/build
           df -h /nix /tmp
       - run: df -h && df -i
-      - run: nix build --impure --no-sandbox --print-build-logs 'path:nix/.#test'
+      - run: cachix watch-exec 1 -- nix build --impure --no-sandbox --print-build-logs 'path:nix/.#test'
         env:
-            TMPDIR: /nix/build
-      - run: |
-          OUTPUTS=$(nix eval --raw 'path:nix/.#test' --apply 'x: builtins.concatStringsSep " " (builtins.attrValues x)')
-          for path in $OUTPUTS; do
-            cachix push "1" "$path"
-          done
-        env:
+          TMPDIR: /nix/build
           CACHIX_AUTH_TOKEN: ${{ secrets.CACHIX_AUTH_TOKEN }}
       - run: df -h && df -i
         if: always()
