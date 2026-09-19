@@ -4,8 +4,8 @@ on:
 jobs:
   cache:
     runs-on: ubuntu-26.04-arm
-    env:
-      TMPDIR: /nix/build
+    # env:
+    #   TMPDIR: /nix/build
     steps:
       - uses: actions/checkout@v4
       # - uses: wimpysworld/nothing-but-nix@main
