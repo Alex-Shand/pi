@@ -12,8 +12,8 @@ jobs:
         with:
           hatchet-protocol: 'cleave'
           witness-carnage: true
-      - run: rm -rf /build
-      - run: ln -s /build /nix/build
+      - run: sudo rm -rf /build
+      - run: sudo ln -s /nix/build /build
       - uses: cachix/install-nix-action@v25
         with:
           nix_path: nixpkgs=channel:nixos-26.05
