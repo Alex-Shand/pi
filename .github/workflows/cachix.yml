@@ -4,6 +4,8 @@ on:
 jobs:
   cache:
     runs-on: ubuntu-26.04-arm
+    env:
+      TMPDIR: /nix/build
     steps:
       - uses: actions/checkout@v4
       - uses: wimpysworld/nothing-but-nix@main
@@ -13,9 +15,6 @@ jobs:
       - uses: cachix/install-nix-action@v25
         with:
           nix_path: nixpkgs=channel:nixos-26.05
-          extra_nix_config: |
-            build-dir = /nix/build
-            tmpdir = /nix/build
       - uses: cachix/cachix-action@v14
         with:
           name: "1"
