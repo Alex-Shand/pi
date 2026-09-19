@@ -30,11 +30,11 @@ jobs:
           ls -la /nix/build
           df -h /nix /tmp
       - run: df -h && df -i
-      - run: nix build --impure --no-sandbox --print-build-logs 'path:nix/.#hello'
+      - run: nix build --impure --no-sandbox --print-build-logs 'path:nix/.#test'
         env:
             TMPDIR: /nix/build
       - run: |
-          OUTPUTS=$(nix eval --raw '.#hello' --apply 'x: builtins.concatStringsSep " " (builtins.attrValues x)')
+          OUTPUTS=$(nix eval --raw '.#test' --apply 'x: builtins.concatStringsSep " " (builtins.attrValues x)')
           for path in $OUTPUTS; do
             cachix push "1" "$path"
           done
