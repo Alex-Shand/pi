@@ -22,8 +22,7 @@ jobs:
       - run: |
           sudo mkdir -p /nix/build
           sudo chmod 777 /nix/build
-          sudo mv /tmp /tmp.old
-          sudo ln -s /nix/build /tmp
+          sudo mount --bind /nix/build /tmp
           echo "TMPDIR=/nix/build" >> $GITHUB_ENV
       - run: |
           whoami
